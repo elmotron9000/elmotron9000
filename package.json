@@ -1,0 +1,31 @@
+{
+  "name": "@elmotron9000/elmotron9000",
+  "version": "1.0.0",
+  "description": "Generate training videos automatically in your CI pipeline",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "clean": "rimraf lib",
+    "start": "node lib/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elmotron9000/elmotron9000.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/elmotron9000/elmotron9000/issues"
+  },
+  "homepage": "https://github.com/elmotron9000/elmotron9000#readme",
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "playwright": "^1.1.1",
+    "playwright-core": "^1.1.1",
+    "playwright-video": "^2.2.0"
+  }
+}
