@@ -110,53 +110,82 @@ export class Elmotron9000 {
         await this.sleep(waitTime);
     }
 
-    public async showCallout(query: string) {
+    public async showCallout(selector: string) {
         if (this._callout) {
             await this.hideCallout();
         }
 
-        const overlay = await this._page.$eval(query, (focusedElement: HTMLElement) => {
-            focusedElement.style.zIndex = "1001";
-            const highlight = document.createElement("div");
-            const overlay = document.createElement("div");
-
-            overlay.style.top = "0px";
-            overlay.style.bottom = "0px";
-            overlay.style.left = "0px";
-            overlay.style.right = "0px";
-            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
-            overlay.style.zIndex = "999";
-            overlay.style.position = "fixed";
-            overlay.style.opacity = "0";
-            overlay.style.transition = "opacity 250ms";
-            overlay.id = "calloutOverlay";
-            document.body.appendChild(overlay);
-
+        const overlay = await this._page.$eval(selector, (focusedElement: HTMLElement) => {
+            const offset = 8;
             const rect = focusedElement.getBoundingClientRect();
+            const overlayTop = document.createElement("div");
+            const overlayBottom = document.createElement("div");
+            const overlayLeft = document.createElement("div");
+            const overlayRight = document.createElement("div");
 
-            highlight.style.position = "absolute";
-            highlight.style.left = `${rect.left - 4}px`;
-            highlight.style.top = `${rect.top - 4}px`;
-            highlight.style.width = `${rect.width + 8}px`;
-            highlight.style.height = `${rect.height + 8}px`;
-            highlight.style.backgroundColor = "white";
-            highlight.style.zIndex = "1000";
-            highlight.style.opacity = "0";
-            highlight.style.transition = "opacity 250ms";
-            highlight.id = "calloutHighlight";
-            document.body.appendChild(highlight);
+            overlayTop.style.top = "0px";
+            overlayTop.style.bottom = `${window.innerHeight - rect.top + offset}px`;
+            overlayTop.style.left = "0px";
+            overlayTop.style.right = "0px";
+            overlayTop.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+            overlayTop.style.zIndex = "999";
+            overlayTop.style.position = "fixed";
+            overlayTop.style.opacity = "0";
+            overlayTop.style.transition = "opacity 250ms";
+            overlayTop.id = "overlayTop";
+            document.body.appendChild(overlayTop);
 
-            overlay.style.opacity = "1";
-            highlight.style.opacity = "1";
+            overlayBottom.style.top = `${rect.bottom + offset}px`;
+            overlayBottom.style.bottom = "0px";
+            overlayBottom.style.left = "0px";
+            overlayBottom.style.right = "0px";
+            overlayBottom.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+            overlayBottom.style.zIndex = "999";
+            overlayBottom.style.position = "fixed";
+            overlayBottom.style.opacity = "0";
+            overlayBottom.style.transition = "opacity 250ms";
+            overlayBottom.id = "overlayBottom";
+            document.body.appendChild(overlayBottom);
+
+
+            overlayLeft.style.top = `${rect.top - offset}px`;
+            overlayLeft.style.bottom = `${window.innerHeight - rect.bottom - offset}px`;
+            overlayLeft.style.left = `0px`;
+            overlayLeft.style.right = `${window.innerWidth - rect.left + offset}px`;
+            overlayLeft.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+            overlayLeft.style.zIndex = "999";
+            overlayLeft.style.position = "fixed";
+            overlayLeft.style.opacity = "0";
+            overlayLeft.style.transition = "opacity 250ms";
+            overlayLeft.id = "overlayLeft";
+            document.body.appendChild(overlayLeft);
+
+            overlayRight.style.top = `${rect.top - offset}px`;
+            overlayRight.style.bottom = `${window.innerHeight - rect.bottom - offset}px`;
+            overlayRight.style.left = `${rect.right + offset}px`;
+            overlayRight.style.right = "0px";
+            overlayRight.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+            overlayRight.style.zIndex = "999";
+            overlayRight.style.position = "fixed";
+            overlayRight.style.opacity = "0";
+            overlayRight.style.transition = "opacity 250ms";
+            overlayRight.id = "overlayRight";
+            document.body.appendChild(overlayRight);
+
+            overlayTop.style.opacity = "1";
+            overlayBottom.style.opacity = "1";
+            overlayLeft.style.opacity = "1";
+            overlayRight.style.opacity = "1";
 
             return {
-                highlight: `#${highlight.id}`,
-                overlay: `#${overlay.id}`
+                overlayTop: `${overlayTop.id}`,
+                overlayBottom: `${overlayBottom.id}`,
+                overlayLeft: `${overlayLeft.id}`,
+                overlayRight: `${overlayRight.id}`,
             };
         });
 
         this._callout = {
-            focusedElement: query,
             ...overlay
         };
     }
@@ -166,16 +195,30 @@ export class Elmotron9000 {
             return;
         }
 
-        const { focusedElement, highlight, overlay } = this._callout;
+        await this._page.evaluate(({ overlayTop, overlayBottom, overlayLeft, overlayRight }) => {
+            console.log(overlayTop, overlayBottom, overlayLeft, overlayRight);
+            const elements = [
+                document.getElementById(overlayTop),
+                document.getElementById(overlayBottom),
+                document.getElementById(overlayLeft),
+                document.getElementById(overlayRight),
+            ];
 
-        await this._page.$eval(overlay, e => e.style.opacity = "0");
-        await this._page.$eval(highlight, e => e.style.opacity = "0");
+            elements.forEach(el => el!.style.opacity = "0");
+        }, this._callout);
+
         await this.sleep(250);
 
-        await this._page.$eval(overlay, e => e.remove());
-        await this._page.$eval(highlight, e => e.remove());
+        await this._page.evaluate(({ overlayTop, overlayBottom, overlayLeft, overlayRight }) => {
+            const elements = [
+                document.getElementById(overlayTop),
+                document.getElementById(overlayBottom),
+                document.getElementById(overlayLeft),
+                document.getElementById(overlayRight),
+            ];
 
-        await this._page.$eval(focusedElement, e => e.style.zIndex = "");
+            elements.forEach(el => el!.remove());
+        }, this._callout);
 
         this._callout = undefined;
     }
