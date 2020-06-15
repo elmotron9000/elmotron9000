@@ -24,7 +24,8 @@ export interface Audio {
 }
 
 export interface CalloutElements {
-    focusedElement: string;
-    highlight: string;
-    overlay: string;
+    overlayTop: string;
+    overlayBottom: string;
+    overlayLeft: string;
+    overlayRight: string;
 }
