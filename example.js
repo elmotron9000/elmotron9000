@@ -18,6 +18,7 @@ async function makeDdgScene(elmo) {
     await ddgScene.sleep(1000);
     await ddgScene.say("maybe duck duck go can help me");
     await ddgScene.click("#search_form_input_homepage");
+    ddgScene.say("drink bleach kill virus or no");
     await ddgScene.type("drink bleach kill virus or no");
     await ddgScene.click("#search_button_homepage");
     await ddgScene.waitForSelector("#links");
