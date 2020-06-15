@@ -40,5 +40,5 @@ lib/**/*
 # ignore yarn.lock
 yarn.lock
 
-example.png
-example.mp4
+*.srt
+*.mp4
