@@ -1,6 +1,6 @@
 {
   "name": "@elmotron9000/elmotron9000",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Generate training videos automatically in your CI pipeline",
   "main": "lib/index.js",
   "scripts": {
