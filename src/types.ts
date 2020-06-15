@@ -20,3 +20,9 @@ export interface Audio {
     timestamp: number;
     text: string;
 }
+
+export interface CalloutElements {
+    focusedElement: string;
+    highlight: string;
+    overlay: string;
+}

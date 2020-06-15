@@ -2,17 +2,9 @@ import { getAudio } from '@elmotron9000/tts';
 import { performance } from "perf_hooks";
 import { chromium, Page, WebKitBrowser } from "playwright";
 import { PageVideoCapture, saveVideo } from "playwright-video";
-import { BoundingBox, VideoMetadata, Config } from "./types";
-import { installMouseHelper } from "./utils/install-mouse-helper";
-import { snackbarStyle } from "./utils/snackbar-style";
 import { RetryableError } from './retryable-error';
-
-
-export interface CalloutElements {
-    focusedElement: string;
-    highlight: string;
-    overlay: string;
-}
+import { BoundingBox, CalloutElements, Config, VideoMetadata } from "./types";
+import { installMouseHelper } from "./utils/install-mouse-helper";
 
 export class Elmotron9000 {
     private _page!: Page;
