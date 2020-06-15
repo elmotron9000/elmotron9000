@@ -187,6 +187,14 @@ export class Elmotron9000 {
         return this._page.waitForSelector(selector);
     }
 
+    public page() {
+        return this._page;
+    }
+
+    public getElement(selector: string) {
+        return this._page.$(selector);
+    }
+
     public async _getElementPosition(selector: string): Promise<BoundingBox> {
         let elem = await this._page.$(selector);
 
