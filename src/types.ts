@@ -7,10 +7,11 @@ export interface BoundingBox {
 
 export interface Config {
     videoFile: string;
+    subtitles: boolean;
     headless?: boolean;
 }
 
-export interface VideoMetadata {
+export interface VideoSceneMetadata {
     filename: string;
     audio: Audio[];
     type: "video";
