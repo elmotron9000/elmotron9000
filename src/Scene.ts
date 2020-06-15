@@ -241,8 +241,8 @@ export class Scene {
     }
 
     public async installRevealjs() {
-        const js = join(__dirname, "..", "node_modules", "reveal.js", "dist", "reveal.js");
-        const css = join(__dirname, "..", "node_modules", "reveal.js", "dist", "reveal.css");
+        const js = require.resolve("reveal.js");
+        const css = require.resolve("reveal.js").replace("dist/reveal.js", "dist/reveal.css");
         const revealjsExists = await promisify(exists)(js);
         const revealcssExists = await promisify(exists)(css);
         
@@ -265,7 +265,7 @@ export class Scene {
         }, [text, stylesheet]);
     }
 
-    public async showSlides(slidesMarkup: string, time: number) {
+    public async showSlides(slidesMarkup: string) {
         await this.installRevealjs();
 
         await this._page.evaluate((slidesMarkup) => {
@@ -288,8 +288,15 @@ export class Scene {
                 center: false,
             })`);
         }, slidesMarkup);
+    }
 
-        await this.sleep(time);
+    public async hideSlides() {
+        await this._page.evaluate(() => {
+            const reveal = document.getElementById("slides");
+            if (!reveal) {
+                throw new Error("No slides to hide");
+            }
+        });
 
         await this._page.evaluate(() => {
             const reveal = document.getElementById("slides")!;
