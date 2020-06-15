@@ -1,29 +1,33 @@
 import { performance } from "perf_hooks";
-import { Page, WebKitBrowser } from "playwright";
+import { chromium, Page, WebKitBrowser } from "playwright";
 import { PageVideoCapture, saveVideo } from "playwright-video";
 import { BoundingBox } from "./types";
 import { installMouseHelper } from "./utils/install-mouse-helper";
 
 export interface Config {
-    initialPage: string;
     videoFile: string;
 }
 
 export class Elmotron9000 {
     private _page!: Page;
+    private _browser!: WebKitBrowser;
     private _video!: PageVideoCapture;
 
     private _startTimeStamp: number = -1;
 
-    constructor(private _browser: WebKitBrowser, private _config: Config) { }
+    constructor(private _config: Config) { }
 
-    public async start() {
+    public async start(page: string, waitForSelector: string) {
+        this._browser = await chromium.launch({ slowMo: 41.666 });
+
         this._page = await this._browser.newPage();
-        await this._page.goto(this._config.initialPage, {
+        await this._page.goto(page, {
             waitUntil: "domcontentloaded"
         });
 
         await installMouseHelper(this._page);
+
+        await this._page.waitForSelector(waitForSelector);
 
         this._video = await saveVideo(this._page, this._config.videoFile);
         this._startTimeStamp = performance.now();
@@ -36,6 +40,7 @@ export class Elmotron9000 {
         await this._page.mouse.move(x, y, {
             steps: 24
         });
+        await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     public async click(selector?: string) {
@@ -45,12 +50,14 @@ export class Elmotron9000 {
 
         await this._page.mouse.down();
         await this._page.mouse.up();
+        await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     public async type(str: string) {
         for (const key of str) {
             await this._page.keyboard.press(key);
         }
+        await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     public async stop() {
