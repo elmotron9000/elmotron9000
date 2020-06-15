@@ -3,6 +3,7 @@ import { chromium, Page, WebKitBrowser } from "playwright";
 import { PageVideoCapture, saveVideo } from "playwright-video";
 import { BoundingBox } from "./types";
 import { installMouseHelper } from "./utils/install-mouse-helper";
+import { snackbarStyle } from "./utils/snackbar-style";
 
 export interface Config {
     videoFile: string;
@@ -72,6 +73,28 @@ export class Elmotron9000 {
         console.log(`Wrote out a ${length} second video to ${this._config.videoFile}`);
     }
 
+    public async toast(text: string) {
+        await this._page.evaluate(([text, style]) => {
+            const snackbar = document.createElement("div");
+            snackbar.id = "snackbar";
+            snackbar.innerHTML = text;
+
+            const styleElement = document.createElement("style");
+            styleElement.id = "snackbar-style"
+            styleElement.innerHTML = style;
+
+            document.head.appendChild(styleElement);
+            document.body.appendChild(snackbar);
+        }, [text, snackbarStyle])
+
+        await this._page.$eval("#snackbar", e => { e.classList.add("show"); })
+        await new Promise(resolve => setTimeout(resolve, 500 + readingTime(text)));
+        await this._page.$eval("#snackbar", e => { e.classList.remove("show"); })
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await this._page.$eval("#snackbar", e => { e.parentNode?.removeChild(e); })
+        await this._page.$eval("#snackbar-style", e => { e.parentNode?.removeChild(e); })
+    }
+
     public async _getElementPosition(selector: string): Promise<BoundingBox> {
         let elem = await this._page.$(selector);
 
@@ -98,3 +121,9 @@ export class Elmotron9000 {
         });
     }
 }
+
+function readingTime(text: string) {
+    const wordsPerMinute = 200;
+    const noOfWords = text.split(/\s/g).length;
+    return (noOfWords / wordsPerMinute) * 60 * 1000;
+  }
