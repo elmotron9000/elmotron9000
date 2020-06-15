@@ -120,6 +120,8 @@ export class Elmotron9000 {
             overlay.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
             overlay.style.zIndex = "999";
             overlay.style.position = "fixed";
+            overlay.style.opacity = "0";
+            overlay.style.transition = "opacity 250ms";
             overlay.id = "calloutOverlay";
             document.body.appendChild(overlay);
             
@@ -132,8 +134,13 @@ export class Elmotron9000 {
             highlight.style.height = `${rect.height + 8}px`;
             highlight.style.backgroundColor = "white";
             highlight.style.zIndex = "1000";
+            highlight.style.opacity = "0";
+            highlight.style.transition = "opacity 250ms";
             highlight.id = "calloutHighlight";
             document.body.appendChild(highlight);
+
+            overlay.style.opacity = "1";
+            highlight.style.opacity = "1";
     
             return {
                 highlight: `#${highlight.id}`,
@@ -154,9 +161,14 @@ export class Elmotron9000 {
 
         const { focusedElement, highlight, overlay } = this._callout;
 
-        await this._page.$eval(focusedElement, e => e.style.zIndex = "");
+        await this._page.$eval(overlay, e => e.style.opacity = "0");
+        await this._page.$eval(highlight, e => e.style.opacity = "0");
+        await new Promise(resolve => setTimeout(resolve, 250));
+
         await this._page.$eval(overlay, e => e.remove());
         await this._page.$eval(highlight, e => e.remove());
+
+        await this._page.$eval(focusedElement, e => e.style.zIndex = "");
 
         this._callout = undefined;
     }
