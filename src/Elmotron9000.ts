@@ -30,15 +30,16 @@ export class Elmotron9000 {
 
         this._page = await this._browser.newPage();
         await this._page.goto(page, { waitUntil: "domcontentloaded" });
-        await installMouseHelper(this._page);
     }
 
     public async startRecording() {
+        await installMouseHelper(this._page);
         this._video = await saveVideo(this._page, this._config.videoFile);
         this._startTimeStamp = performance.now();
     }
 
     public async moveTo(selector: string) {
+        await installMouseHelper(this._page);
         const position = await this._getElementPosition(selector);
         const [x, y] = [position.x + (position.width / 2), position.y + (position.height / 2)];
 
@@ -49,6 +50,7 @@ export class Elmotron9000 {
     }
 
     public async click(selector?: string) {
+        await installMouseHelper(this._page);
         if (selector) {
             await this.moveTo(selector);
         }
@@ -59,6 +61,7 @@ export class Elmotron9000 {
     }
 
     public async type(str: string) {
+        await installMouseHelper(this._page);
         for (const key of str) {
             await this._page.keyboard.press(key);
         }
@@ -78,7 +81,6 @@ export class Elmotron9000 {
     }
 
     public async say(text: string) {
-        // const readingTime = getReadingTime(text);
         this.log("downloading text");
         const dlStart = performance.now();
         const audio = await getAudio(text);

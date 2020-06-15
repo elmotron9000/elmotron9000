@@ -5,6 +5,9 @@ import { Page } from "playwright";
 // Useful for debugging
 export async function installMouseHelper(page: Page) {
     await page.evaluate((function () {
+        if ((document as any).mouseHelperInstalled) {
+          return;
+        }
         const box = document.createElement('div');
         box.classList.add('mouse-helper');
         const styleElement = document.createElement('style');
@@ -64,5 +67,6 @@ export async function installMouseHelper(page: Page) {
             for (let i = 0; i < 5; i++)
                 box.classList.toggle('button-' + i, Boolean(buttons & (1 << i)));
         }
+        (document as any).mouseHelperInstalled = true;
     }));
 };
