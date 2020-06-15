@@ -87,9 +87,13 @@ export class Scene {
         if (close) {
             await this._browser.close();
         }
-        
+
         this._elmo.addScene(this.metadata);
         return this.metadata;
+    }
+
+    public async close() {
+        await this._browser.close();
     }
 
     public async say(text: string) {
