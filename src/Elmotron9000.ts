@@ -1,5 +1,5 @@
-import { getAudio } from '@elmotron9000/tts';
 import { getLengthOfFile } from '@elmotron9000/fmlpeg';
+import { getAudio } from '@elmotron9000/tts';
 import { performance } from "perf_hooks";
 import { chromium, Page, WebKitBrowser } from "playwright";
 import { PageVideoCapture, saveVideo } from "playwright-video";
@@ -25,18 +25,15 @@ export class Elmotron9000 {
         }
     }
 
-    public async start(page: string, waitForSelector: string) {
+    public async init(page: string) {
         this._browser = await chromium.launch({ slowMo: 41.666 });
 
         this._page = await this._browser.newPage();
-        await this._page.goto(page, {
-            waitUntil: "domcontentloaded"
-        });
-
+        await this._page.goto(page, { waitUntil: "domcontentloaded" });
         await installMouseHelper(this._page);
+    }
 
-        await this._page.waitForSelector(waitForSelector);
-
+    public async startRecording() {
         this._video = await saveVideo(this._page, this._config.videoFile);
         this._startTimeStamp = performance.now();
     }
@@ -48,7 +45,7 @@ export class Elmotron9000 {
         await this._page.mouse.move(x, y, {
             steps: 24
         });
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await this.sleep(200);
     }
 
     public async click(selector?: string) {
@@ -58,14 +55,14 @@ export class Elmotron9000 {
 
         await this._page.mouse.down();
         await this._page.mouse.up();
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await this.sleep(200);
     }
 
     public async type(str: string) {
         for (const key of str) {
             await this._page.keyboard.press(key);
         }
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await this.sleep(200);
     }
 
     public async stop() {
@@ -92,17 +89,22 @@ export class Elmotron9000 {
         });
         const dltime = performance.now() - dlStart;
         this.log(`downloaded in ${dltime} ms`);
-        const readingTime = await getLengthOfFile(audio.path);
 
-        if (!readingTime) {
+        const readingTimeSeconds = await getLengthOfFile(audio.path);
+
+        if (!readingTimeSeconds) {
             throw new Error(`Could not read audio length ${audio.path}`);
         }
 
+        const readingTime = readingTimeSeconds * 1000;
+
+        this.log(`reading time: ${readingTime}`)
         const waitTime = readingTime - dltime;
+        this.log(`remaining wait time: ${waitTime}`)
         if (waitTime < 0) {
             throw new RetryableError("Took too long to download file");
         }
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        await this.sleep(waitTime);
     }
 
     public async showCallout(query: string) {
@@ -165,7 +167,7 @@ export class Elmotron9000 {
 
         await this._page.$eval(overlay, e => e.style.opacity = "0");
         await this._page.$eval(highlight, e => e.style.opacity = "0");
-        await new Promise(resolve => setTimeout(resolve, 250));
+        await this.sleep(250);
 
         await this._page.$eval(overlay, e => e.remove());
         await this._page.$eval(highlight, e => e.remove());
@@ -173,6 +175,14 @@ export class Elmotron9000 {
         await this._page.$eval(focusedElement, e => e.style.zIndex = "");
 
         this._callout = undefined;
+    }
+
+    public async sleep(ms: number) {
+        await new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    public async waitForSelector(selector: string) {
+        return this._page.waitForSelector(selector);
     }
 
     public async _getElementPosition(selector: string): Promise<BoundingBox> {
@@ -208,6 +218,9 @@ export class Elmotron9000 {
 
     /** Time since the start of the video in seconds */
     private now() {
+        if (this._startTimeStamp === -1) {
+            return 0;
+        }
         const now = Math.round(performance.now() - this._startTimeStamp);
         return now / 1000;
     }

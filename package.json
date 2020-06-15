@@ -31,5 +31,13 @@
     "playwright": "^1.1.1",
     "playwright-core": "^1.1.1",
     "playwright-video": "^2.2.0"
-  }
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "lib/**/*.map",
+    "doc",
+    "LICENSE",
+    "README.md"
+  ]
 }
