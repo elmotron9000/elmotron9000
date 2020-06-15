@@ -22,6 +22,7 @@ export async function installMouseHelper(page: Page) {
           margin-left: -10px;
           margin-top: -10px;
           transition: background .2s, border-radius .2s, border-color .2s;
+          z-index: 99999999;
         }
         .mouse-helper.button-1 {
           transition: none;
