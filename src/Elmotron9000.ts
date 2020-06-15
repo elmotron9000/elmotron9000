@@ -191,6 +191,10 @@ export class Elmotron9000 {
         return this._page;
     }
 
+    public async installMouseHelper() {
+        return installMouseHelper(this._page);
+    }
+
     public getElement(selector: string) {
         return this._page.$(selector);
     }
