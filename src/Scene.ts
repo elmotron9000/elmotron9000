@@ -10,6 +10,8 @@ import { BoundingBox, CalloutElements, Config, VideoSceneMetadata } from "./type
 import { installMouseHelper } from "./utils/install-mouse-helper";
 import { Elmo } from './Elmotron9000';
 import { getSceneDir } from './utils/files';
+import { exists, readFile } from "fs";
+import { promisify } from "util";
 
 export class Scene {
     private _video!: PageVideoCapture;
@@ -236,6 +238,70 @@ export class Scene {
         }, this._callout);
 
         this._callout = undefined;
+    }
+
+    public async installRevealjs() {
+        const js = join(__dirname, "..", "node_modules", "reveal.js", "dist", "reveal.js");
+        const css = join(__dirname, "..", "node_modules", "reveal.js", "dist", "reveal.css");
+        const revealjsExists = await promisify(exists)(js);
+        const revealcssExists = await promisify(exists)(css);
+        
+        if (!(revealjsExists && revealcssExists)) {
+            throw new Error(`Reveal.js not found at ${js}`);
+        }
+
+        const text = (await promisify(readFile)(js, 'utf8'));
+        const stylesheet = (await promisify(readFile)(css, 'utf8'));
+
+        await this._page.evaluate(([text, stylesheet]) => {
+            console.log(stylesheet);
+            const style = document.createElement('style');
+            style.innerHTML = stylesheet;
+            document.body.appendChild(style);
+
+            const script = document.createElement('script');
+            script.innerHTML = text;
+            document.body.appendChild(script);
+        }, [text, stylesheet]);
+    }
+
+    public async showSlides(slidesMarkup: string, time: number) {
+        await this.installRevealjs();
+
+        await this._page.evaluate((slidesMarkup) => {
+            const reveal = document.createElement('div');
+            reveal.id = "slides";
+            reveal.innerHTML = slidesMarkup;
+            reveal.style.top = "0px";
+            reveal.style.bottom = "0px";
+            reveal.style.left = "0px";
+            reveal.style.right = "0px";
+            reveal.style.zIndex = "1000";
+            reveal.style.opacity = "1";
+            reveal.style.transition = "opacity 500ms";
+            reveal.style.position = "fixed";
+            document.body.appendChild(reveal);
+
+            window.eval(`Reveal().initialize({
+                controls: false,
+                progress: false,
+                center: false,
+            })`);
+        }, slidesMarkup);
+
+        await this.sleep(time);
+
+        await this._page.evaluate(() => {
+            const reveal = document.getElementById("slides")!;
+            reveal.style.opacity = "0";
+        });
+
+        await this.sleep(500);
+
+        await this._page.evaluate(() => {
+            const reveal = document.getElementById("slides")!;
+            reveal.remove();
+        });
     }
 
     public async sleep(ms: number) {
