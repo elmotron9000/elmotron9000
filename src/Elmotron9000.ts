@@ -9,12 +9,20 @@ export interface Config {
     videoFile: string;
 }
 
+export interface CalloutElements {
+    focusedElement: string;
+    highlight: string;
+    overlay: string;
+}
+
 export class Elmotron9000 {
     private _page!: Page;
     private _browser!: WebKitBrowser;
     private _video!: PageVideoCapture;
 
     private _startTimeStamp: number = -1;
+
+    private _callout?: CalloutElements;
 
     constructor(private _config: Config) { }
 
@@ -93,6 +101,64 @@ export class Elmotron9000 {
         await new Promise(resolve => setTimeout(resolve, 500));
         await this._page.$eval("#snackbar", e => { e.parentNode?.removeChild(e); })
         await this._page.$eval("#snackbar-style", e => { e.parentNode?.removeChild(e); })
+    }
+
+    public async showCallout(query: string) {
+        if (this._callout) {
+            await this.hideCallout();
+        }
+
+        const overlay = await this._page.$eval(query, (focusedElement: HTMLElement) => {
+            focusedElement.style.zIndex = "1001";
+            const highlight = document.createElement("div");
+            const overlay = document.createElement("div");
+            
+            overlay.style.top = "0px";
+            overlay.style.bottom = "0px";
+            overlay.style.left = "0px";
+            overlay.style.right = "0px";
+            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+            overlay.style.zIndex = "999";
+            overlay.style.position = "fixed";
+            overlay.id = "calloutOverlay";
+            document.body.appendChild(overlay);
+            
+            const rect = focusedElement.getBoundingClientRect();
+            
+            highlight.style.position = "absolute";
+            highlight.style.left = `${rect.left - 4}px`;
+            highlight.style.top = `${rect.top - 4}px`;
+            highlight.style.width = `${rect.width + 8}px`;
+            highlight.style.height = `${rect.height + 8}px`;
+            highlight.style.backgroundColor = "white";
+            highlight.style.zIndex = "1000";
+            highlight.id = "calloutHighlight";
+            document.body.appendChild(highlight);
+    
+            return {
+                highlight: `#${highlight.id}`,
+                overlay: `#${overlay.id}`
+            };
+        });
+    
+        this._callout = {
+            focusedElement: query,
+            ...overlay
+        };
+    }
+
+    public async hideCallout() {
+        if (!this._callout) {
+            return;
+        }
+
+        const { focusedElement, highlight, overlay } = this._callout;
+
+        await this._page.$eval(focusedElement, e => e.style.zIndex = "");
+        await this._page.$eval(overlay, e => e.remove());
+        await this._page.$eval(highlight, e => e.remove());
+
+        this._callout = undefined;
     }
 
     public async _getElementPosition(selector: string): Promise<BoundingBox> {
