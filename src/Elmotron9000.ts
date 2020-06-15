@@ -1,7 +1,6 @@
-import { SceneBuilder }  from "@elmotron9000/fmlpeg";
-
-import { Config, VideoSceneMetadata } from "./types";
+import { SceneBuilder } from "@elmotron9000/fmlpeg";
 import { Scene } from "./Scene";
+import { Config, SceneMetadata } from "./types";
 
 export class Elmo {
     private _sceneBuilder = new SceneBuilder([]);
@@ -12,7 +11,7 @@ export class Elmo {
         return Scene.init(this, this.config, initialPage);
     }
 
-    public addScene(scene: VideoSceneMetadata) {
+    public addScene(scene: SceneMetadata) {
         this._sceneBuilder.addScene(scene);
     }
 

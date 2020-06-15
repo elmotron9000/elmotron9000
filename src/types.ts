@@ -11,10 +11,20 @@ export interface Config {
     headless?: boolean;
 }
 
-export interface VideoSceneMetadata {
+export interface BaseSceneMetadata {
     filename: string;
-    audio: Audio[];
+    audio: Audio[];  
+}
+
+export type SceneMetadata = VideoSceneMetadata | ImageSceneMetadata;
+
+export interface VideoSceneMetadata extends BaseSceneMetadata {
     type: "video";
+}
+
+export interface ImageSceneMetadata extends BaseSceneMetadata {
+    duration: number;
+    type: "photo";
 }
 
 export interface Audio {
