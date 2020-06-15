@@ -4,7 +4,7 @@ const { Elmotron9000 } = require('./lib');
     const elmo = new Elmotron9000({ videoFile: "./example.mp4" });
 
     await elmo.start('https://www.wikipedia.org/', '#searchInput');
-    await elmo.toast("first I will search for something")
+    await elmo.say("first I will search for something")
     await new Promise(resolve => setTimeout(resolve, 1000));
     await elmo.moveTo('#searchInput');
     await elmo.click();
@@ -12,5 +12,7 @@ const { Elmotron9000 } = require('./lib');
     await elmo.moveTo(".pure-button-primary-progressive")
     await elmo.click();
     await new Promise(resolve => setTimeout(resolve, 6000));
-    await elmo.stop();
+    const meta = await elmo.stop();
+
+    console.log(meta);
 })();

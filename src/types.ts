@@ -4,3 +4,19 @@ export interface BoundingBox {
     width: number;
     height: number;
 }
+
+export interface Config {
+    videoFile: string;
+}
+
+export interface VideoMetadata {
+    filename: string;
+    audio: Audio[];
+    type: "video";
+}
+
+export interface Audio {
+    filename: string;
+    timestamp: number;
+    text: string;
+}

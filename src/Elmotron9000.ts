@@ -1,13 +1,12 @@
+import { getAudio } from '@elmotron9000/tts';
 import { performance } from "perf_hooks";
 import { chromium, Page, WebKitBrowser } from "playwright";
 import { PageVideoCapture, saveVideo } from "playwright-video";
-import { BoundingBox } from "./types";
+import { BoundingBox, VideoMetadata, Config } from "./types";
 import { installMouseHelper } from "./utils/install-mouse-helper";
 import { snackbarStyle } from "./utils/snackbar-style";
+import { RetryableError } from './retryable-error';
 
-export interface Config {
-    videoFile: string;
-}
 
 export class Elmotron9000 {
     private _page!: Page;
@@ -16,7 +15,15 @@ export class Elmotron9000 {
 
     private _startTimeStamp: number = -1;
 
-    constructor(private _config: Config) { }
+    private metadata: VideoMetadata;
+
+    constructor(private _config: Config) {
+        this.metadata = {
+            filename: _config.videoFile,
+            type: "video",
+            audio: []
+        }
+    }
 
     public async start(page: string, waitForSelector: string) {
         this._browser = await chromium.launch({ slowMo: 41.666 });
@@ -66,33 +73,30 @@ export class Elmotron9000 {
             throw new Error("Must start before you can stop");
         }
 
-        const length = (performance.now() - this._startTimeStamp) / 1000;
+        this.log('done');
         await this._video.stop();
 
         await this._browser.close();
-        console.log(`Wrote out a ${length} second video to ${this._config.videoFile}`);
+        return this.metadata;
     }
 
-    public async toast(text: string) {
-        await this._page.evaluate(([text, style]) => {
-            const snackbar = document.createElement("div");
-            snackbar.id = "snackbar";
-            snackbar.innerHTML = text;
-
-            const styleElement = document.createElement("style");
-            styleElement.id = "snackbar-style"
-            styleElement.innerHTML = style;
-
-            document.head.appendChild(styleElement);
-            document.body.appendChild(snackbar);
-        }, [text, snackbarStyle])
-
-        await this._page.$eval("#snackbar", e => { e.classList.add("show"); })
-        await new Promise(resolve => setTimeout(resolve, 500 + readingTime(text)));
-        await this._page.$eval("#snackbar", e => { e.classList.remove("show"); })
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await this._page.$eval("#snackbar", e => { e.parentNode?.removeChild(e); })
-        await this._page.$eval("#snackbar-style", e => { e.parentNode?.removeChild(e); })
+    public async say(text: string) {
+        const readingTime = getReadingTime(text);
+        this.log("downloading text");
+        const dlStart = performance.now();
+        const audio = await getAudio(text);
+        this.metadata.audio.push({
+            filename: audio.path,
+            timestamp: this.now(),
+            text
+        });
+        const dltime = performance.now() - dlStart;
+        this.log(`downloaded in ${dltime} ms`);
+        const waitTime = readingTime - dltime;
+        if (waitTime < 0) {
+            throw new RetryableError("Took too long to download file");
+        }
+        await new Promise(resolve => setTimeout(resolve, waitTime));
     }
 
     public async _getElementPosition(selector: string): Promise<BoundingBox> {
@@ -120,10 +124,21 @@ export class Elmotron9000 {
             }
         });
     }
+
+    private log(msg: string) {
+        const s = this.now();
+        console.log(`${s.toFixed(3).padStart(8)}: ${msg}`)
+    }
+
+    /** Time since the start of the video in seconds */
+    private now() {
+        const now = Math.round(performance.now() - this._startTimeStamp);
+        return now / 1000;
+    }
 }
 
-function readingTime(text: string) {
+function getReadingTime(text: string) {
     const wordsPerMinute = 200;
     const noOfWords = text.split(/\s/g).length;
     return (noOfWords / wordsPerMinute) * 60 * 1000;
-  }
+}
