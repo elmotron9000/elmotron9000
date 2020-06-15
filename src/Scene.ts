@@ -75,7 +75,7 @@ export class Scene {
         await this.sleep(200);
     }
 
-    public async stop() {
+    public async stop(close = true) {
         await this.sleep(1000);
         if (!this._video || !this._page || this._startTimeStamp === -1) {
             throw new Error("Must start before you can stop");
@@ -84,7 +84,10 @@ export class Scene {
         this.log('done');
         await this._video.stop();
 
-        await this._browser.close();
+        if (close) {
+            await this._browser.close();
+        }
+        
         this._elmo.addScene(this.metadata);
         return this.metadata;
     }
