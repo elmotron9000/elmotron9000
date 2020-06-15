@@ -1,4 +1,5 @@
 import { getAudio } from '@elmotron9000/tts';
+import { getLengthOfFile } from '@elmotron9000/fmlpeg';
 import { performance } from "perf_hooks";
 import { chromium, Page, WebKitBrowser } from "playwright";
 import { PageVideoCapture, saveVideo } from "playwright-video";
@@ -80,7 +81,7 @@ export class Elmotron9000 {
     }
 
     public async say(text: string) {
-        const readingTime = getReadingTime(text);
+        // const readingTime = getReadingTime(text);
         this.log("downloading text");
         const dlStart = performance.now();
         const audio = await getAudio(text);
@@ -91,6 +92,12 @@ export class Elmotron9000 {
         });
         const dltime = performance.now() - dlStart;
         this.log(`downloaded in ${dltime} ms`);
+        const readingTime = await getLengthOfFile(audio.path);
+
+        if (!readingTime) {
+            throw new Error(`Could not read audio length ${audio.path}`);
+        }
+
         const waitTime = readingTime - dltime;
         if (waitTime < 0) {
             throw new RetryableError("Took too long to download file");
@@ -107,7 +114,7 @@ export class Elmotron9000 {
             focusedElement.style.zIndex = "1001";
             const highlight = document.createElement("div");
             const overlay = document.createElement("div");
-            
+
             overlay.style.top = "0px";
             overlay.style.bottom = "0px";
             overlay.style.left = "0px";
@@ -119,9 +126,9 @@ export class Elmotron9000 {
             overlay.style.transition = "opacity 250ms";
             overlay.id = "calloutOverlay";
             document.body.appendChild(overlay);
-            
+
             const rect = focusedElement.getBoundingClientRect();
-            
+
             highlight.style.position = "absolute";
             highlight.style.left = `${rect.left - 4}px`;
             highlight.style.top = `${rect.top - 4}px`;
@@ -136,13 +143,13 @@ export class Elmotron9000 {
 
             overlay.style.opacity = "1";
             highlight.style.opacity = "1";
-    
+
             return {
                 highlight: `#${highlight.id}`,
                 overlay: `#${overlay.id}`
             };
         });
-    
+
         this._callout = {
             focusedElement: query,
             ...overlay
@@ -206,8 +213,8 @@ export class Elmotron9000 {
     }
 }
 
-function getReadingTime(text: string) {
-    const wordsPerMinute = 200;
-    const noOfWords = text.split(/\s/g).length;
-    return (noOfWords / wordsPerMinute) * 60 * 1000;
-}
+// function getReadingTime(text: string) {
+//     const wordsPerMinute = 200;
+//     const noOfWords = text.split(/\s/g).length;
+//     return (noOfWords / wordsPerMinute) * 60 * 1000;
+// }

@@ -20,10 +20,12 @@
   },
   "homepage": "https://github.com/elmotron9000/elmotron9000#readme",
   "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.14",
     "rimraf": "^3.0.2",
     "typescript": "^3.9.5"
   },
   "dependencies": {
+    "@elmotron9000/fmlpeg": "^0.1.1",
     "@elmotron9000/tts": "0.0.4",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "playwright": "^1.1.1",
