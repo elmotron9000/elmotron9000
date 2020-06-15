@@ -1,4 +1,5 @@
 const { Elmotron9000 } = require('./lib');
+const { SceneBuilder } = require("@elmotron9000/fmlpeg");
 
 (async () => {
     const elmo = new Elmotron9000({ videoFile: "./example.mp4" });
@@ -14,7 +15,12 @@ const { Elmotron9000 } = require('./lib');
     await elmo.moveTo(".pure-button-primary-progressive")
     await elmo.click();
     await elmo.say("thought for sure this would return something")
-    const meta = await elmo.stop();
+    const scene1 = await elmo.stop();
 
-    console.log(meta);
+    const builder = new SceneBuilder([]); 
+    builder.addScene(scene1);
+
+    await builder.build({
+        filename: "out.mp4"
+    });
 })();

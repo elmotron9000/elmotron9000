@@ -7,6 +7,7 @@ export interface BoundingBox {
 
 export interface Config {
     videoFile: string;
+    headless?: boolean;
 }
 
 export interface VideoMetadata {

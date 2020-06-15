@@ -26,7 +26,7 @@ export class Elmotron9000 {
     }
 
     public async init(page: string) {
-        this._browser = await chromium.launch({ slowMo: 41.666 });
+        this._browser = await chromium.launch({ slowMo: 41.666, headless: this._config.headless });
 
         this._page = await this._browser.newPage();
         await this._page.goto(page, { waitUntil: "domcontentloaded" });
@@ -69,6 +69,7 @@ export class Elmotron9000 {
     }
 
     public async stop() {
+        await this.sleep(1000);
         if (!this._video || !this._page || this._startTimeStamp === -1) {
             throw new Error("Must start before you can stop");
         }
