@@ -38,8 +38,7 @@
     "lib/**/*.d.ts",
     "lib/**/*.map",
     "doc",
-    "LICENSE",
-    "README.md"
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"
