@@ -2,43 +2,43 @@ const { Elmo } = require('./lib');
 
 (async () => {
     const elmo = new Elmo({ videoFile: "./example.mp4", subtitles: true });
+    
+    const wikiScene = await elmo.startScene('https://www.wikipedia.org/');
+    const ddgScene = await elmo.startScene('https://duckduckgo.com');
 
     await Promise.all([
-        makeWikiScene(elmo),
-        makeDdgScene(elmo)
+        makeWikiScene(wikiScene),
+        makeDdgScene(ddgScene)
     ]);
 
     await elmo.build();
 })();
 
-async function makeDdgScene(elmo) {
-    const ddgScene = await elmo.startScene('https://duckduckgo.com');
-    await ddgScene.waitForSelector("#search_form_input_homepage");
-    await ddgScene.startRecording();
-    await ddgScene.sleep(1000);
-    await ddgScene.say("maybe duck duck go can help me");
-    await ddgScene.click("#search_form_input_homepage");
-    ddgScene.say("drink bleach kill virus or no");
-    await ddgScene.type("drink bleach kill virus or no");
-    await ddgScene.click("#search_button_homepage");
-    await ddgScene.waitForSelector("#links");
-    await ddgScene.say("guess not");
-    await ddgScene.stop();
+async function makeDdgScene(scene) {
+    await scene.waitForSelector("#search_form_input_homepage");
+    await scene.startRecording();
+    await scene.sleep(1000);
+    await scene.say("maybe duck duck go can help me");
+    await scene.click("#search_form_input_homepage");
+    scene.say("drink bleach kill virus or no");
+    await scene.type("drink bleach kill virus or no");
+    await scene.click("#search_button_homepage");
+    await scene.waitForSelector("#links");
+    await scene.say("guess not");
+    await scene.stop();
 }
 
-async function makeWikiScene(elmo) {
-    const wikiScene = await elmo.startScene('https://www.wikipedia.org/');
-
-    await wikiScene.waitForSelector('#searchInput');
-    await wikiScene.startRecording();
-    await wikiScene.moveTo('#searchInput');
-    await wikiScene.say("first I will search for something");
-    await wikiScene.sleep(1000);
-    await wikiScene.click();
-    wikiScene.say("drink bleach kill virus or no");
-    await wikiScene.type("drink bleach kill virus or no");
-    await wikiScene.moveTo(".pure-button-primary-progressive");
-    await wikiScene.click();
-    await wikiScene.say("thought for sure this would return something");
-    await wikiScene.stop();
+async function makeWikiScene(scene) {
+    await scene.waitForSelector('#searchInput');
+    await scene.startRecording();
+    await scene.moveTo('#searchInput');
+    await scene.say("first I will search for something");
+    await scene.sleep(1000);
+    await scene.click();
+    scene.say("drink bleach kill virus or no");
+    await scene.type("drink bleach kill virus or no");
+    await scene.moveTo(".pure-button-primary-progressive");
+    await scene.click();
+    await scene.say("thought for sure this would return something");
+    await scene.stop();
 }

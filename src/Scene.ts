@@ -21,7 +21,7 @@ export class Scene {
     private metadata: VideoSceneMetadata;
     private _callout?: CalloutElements;
 
-    private constructor(private _elmo: Elmo, private _page: Page, private _browser: WebKitBrowser) {
+    private constructor(elmo: Elmo, private _page: Page, private _browser: WebKitBrowser) {
         const sceneDir = getSceneDir();
         const filename = randomBytes(8).toString('hex') + '.mp4';
 
@@ -30,6 +30,8 @@ export class Scene {
             type: "video",
             audio: []
         }
+
+        elmo.addScene(this.metadata);
     }
 
     public static async init(elmo: Elmo, config: Config, initialUrl: string) {
@@ -37,6 +39,7 @@ export class Scene {
 
         const page = await browser.newPage();
         await page.goto(initialUrl, { waitUntil: "domcontentloaded" });
+
 
         return new Scene(elmo, page, browser);
     }
@@ -90,7 +93,6 @@ export class Scene {
             await this._browser.close();
         }
 
-        this._elmo.addScene(this.metadata);
         return this.metadata;
     }
 
