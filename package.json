@@ -1,6 +1,6 @@
 {
   "name": "@elmotron9000/elmotron9000",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Generate training videos automatically in your CI pipeline",
   "main": "lib/index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "@elmotron9000/fmlpeg": "0.1.7",
+    "@elmotron9000/fmlpeg": "^0.2.0",
     "@elmotron9000/tts": "0.0.4",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "playwright": "^1.1.1",
