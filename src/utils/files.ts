@@ -7,7 +7,7 @@ export function getSceneDir(): string {
     const tempPath = join(tmpdir(), 'elmotron9000', "scenes");
 
     if (!(existsSync(tempPath))) {
-        mkdirSync(tempPath);
+        mkdirSync(tempPath, { recursive: true });
     }
 
     return tempPath;

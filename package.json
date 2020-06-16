@@ -1,6 +1,6 @@
 {
   "name": "@elmotron9000/elmotron9000",
-  "version": "1.0.13",
+  "version": "1.0.19",
   "description": "Generate training videos automatically in your CI pipeline",
   "main": "lib/index.js",
   "scripts": {
@@ -25,20 +25,20 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "@elmotron9000/fmlpeg": "0.1.7",
+    "@elmotron9000/fmlpeg": "^0.2.0",
     "@elmotron9000/tts": "0.0.4",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "playwright": "^1.1.1",
     "playwright-core": "^1.1.1",
-    "playwright-video": "^2.2.0"
+    "playwright-video": "^2.2.0",
+    "reveal.js": "^4.0.2"
   },
   "files": [
     "lib/**/*.js",
     "lib/**/*.d.ts",
     "lib/**/*.map",
     "doc",
-    "LICENSE",
-    "README.md"
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"
