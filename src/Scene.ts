@@ -276,7 +276,7 @@ export class Scene {
             reveal.style.bottom = "0px";
             reveal.style.left = "0px";
             reveal.style.right = "0px";
-            reveal.style.zIndex = "1000";
+            reveal.style.zIndex = "100000000";
             reveal.style.opacity = "1";
             reveal.style.transition = "opacity 500ms";
             reveal.style.position = "fixed";
